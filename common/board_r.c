@@ -37,6 +37,7 @@
 #include <irq_func.h>
 #include <malloc.h>
 #include <mapmem.h>
+#include <memdisk.h>
 #include <miiphy.h>
 #include <mmc.h>
 #include <mux.h>
@@ -699,6 +700,9 @@ static init_fnc_t init_sequence_r[] = {
 #endif
 #ifdef CONFIG_CMD_ONENAND
 	initr_onenand,
+#endif
+#ifdef CONFIG_MEMDISK
+	initr_memdisk,
 #endif
 #ifdef CONFIG_MMC
 	initr_mmc,

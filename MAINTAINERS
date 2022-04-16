@@ -930,6 +930,12 @@ T:	git git://github.com/ARM-software/u-boot.git
 F:	drivers/video/mali_dp.c
 F:	drivers/i2c/i2c-versatile.c
 
+MEMDISK
+M:	Heinrich Schuchardt <xypron.glpk@gmx.de>
+S:	Supported
+F:	drivers/memdisk/
+F:	include/memdisk.h
+
 MICROBLAZE
 M:	Michal Simek <monstr@monstr.eu>
 S:	Maintained

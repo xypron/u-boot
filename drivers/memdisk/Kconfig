@@ -1,0 +1,13 @@
+config MEMDISK
+	bool "Support embedded memory disk"
+	select HAVE_BLOCK_DEVICE
+	help
+	 This option allows to embed a memory disk.
+
+config MEMDISK_FILE
+	string "Memory disk file"
+	depends on MEMDISK
+	default "memdisk.img"
+	help
+	 File to be embedded as memory disk.
+	 It can be accessed as block device 'mem 0'.
