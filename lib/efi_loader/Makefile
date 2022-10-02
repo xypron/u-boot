@@ -14,6 +14,8 @@ CFLAGS_efi_boottime.o += \
   -DFW_PATCHLEVEL="0x$(PATCHLEVEL)"
 CFLAGS_helloworld.o := $(CFLAGS_EFI) -Os -ffreestanding
 CFLAGS_REMOVE_helloworld.o := $(CFLAGS_NON_EFI)
+CFLAGS_blkdump.o := $(CFLAGS_EFI) -Os -ffreestanding
+CFLAGS_REMOVE_blkdump.o := $(CFLAGS_NON_EFI)
 CFLAGS_dtbdump.o := $(CFLAGS_EFI) -Os -ffreestanding
 CFLAGS_REMOVE_dtbdump.o := $(CFLAGS_NON_EFI)
 CFLAGS_initrddump.o := $(CFLAGS_EFI) -Os -ffreestanding
@@ -31,6 +33,8 @@ endif
 ifdef CONFIG_EFI_LOAD_FILE2_INITRD
 always += initrddump.efi
 endif
+
+always += blkdump.efi
 
 obj-$(CONFIG_CMD_BOOTEFI_HELLO) += helloworld_efi.o
 obj-$(CONFIG_CMD_BOOTEFI_BOOTMGR) += efi_bootmgr.o
