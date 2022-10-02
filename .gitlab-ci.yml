@@ -2,7 +2,8 @@
 
 # Grab our configured image.  The source for this is found
 # in the u-boot tree at tools/docker/Dockerfile
-image: trini/u-boot-gitlab-ci-runner:jammy-20220801-09Aug2022
+# image: trini/u-boot-gitlab-ci-runner:jammy-20220801-09Aug2022
+image: xypron/u-boot-gitlab-ci-runner:2022-10-02
 
 # We run some tests in different order, to catch some failures quicker.
 stages:
