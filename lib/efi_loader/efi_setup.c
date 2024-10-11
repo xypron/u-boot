@@ -326,6 +326,9 @@ efi_status_t efi_init_obj_list(void)
 	ret = efi_net_register();
 	if (ret != EFI_SUCCESS)
 		goto out;
+	ret = efi_http_register();
+	if (ret != EFI_SUCCESS)
+		goto out;
 #endif
 	if (IS_ENABLED(CONFIG_ACPI)) {
 		ret = efi_acpi_register();

@@ -79,7 +79,7 @@ static inline int store_block(uchar *src, unsigned int offset, unsigned int len)
 	ulong newsize = offset + len;
 	uchar *ptr;
 
-	if (CONFIG_IS_ENABLED(LMB)) {
+	if (CONFIG_IS_ENABLED(LMB) && current_http_info.set_bootdev) {
 		if (store_addr < image_load_addr ||
 		    lmb_read_check(store_addr, len)) {
 			printf("\nwget error: ");
@@ -222,7 +222,7 @@ static void wget_set_http_status_code(const uchar *pkt)
 	char *end;
 	current_http_info.status_code = simple_strtoul(first_space + 1, &end, 10);
 
-	if(second_space != end)
+	if (second_space != end)
 		current_http_info.status_code = -1;
 
 	return;
@@ -484,10 +484,19 @@ static void wget_handler(uchar *pkt, u16 dport,
 	case WGET_TRANSFERRED:
 		printf("Packets received %d, Transfer Successful\n", packets);
 		net_set_state(wget_loop_state);
-		if(current_http_info.method == WGET_HTTP_METHOD_GET) {
+		if (current_http_info.method == WGET_HTTP_METHOD_GET && current_http_info.set_bootdev) {
+			// A bit hacky for now: as the efi http driver will use wget at runtime,
+			// only the first succesful wget download is set as boot device.
+#ifdef CONFIG_EFI_HTTP_PROTOCOL
+			efi_set_bootdev("Http", "", image_url,
+					map_sysmem(image_load_addr, 0),
+					net_boot_file_size);
+#else
 			efi_set_bootdev("Net", "", image_url,
 					map_sysmem(image_load_addr, 0),
 					net_boot_file_size);
+#endif
+
 		}
 		break;
 	}
