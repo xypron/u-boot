@@ -322,6 +322,11 @@ efi_status_t efi_init_obj_list(void)
 		if (ret != EFI_SUCCESS)
 			goto out;
 	}
+	if (IS_ENABLED(CONFIG_EFI_HTTP_PROTOCOL)) {
+		ret = efi_http_register();
+		if (ret != EFI_SUCCESS)
+			goto out;
+	}
 	if (IS_ENABLED(CONFIG_ACPI)) {
 		ret = efi_acpi_register();
 		if (ret != EFI_SUCCESS)
