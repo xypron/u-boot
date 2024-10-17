@@ -215,6 +215,9 @@ out:
 	return -1;
 }
 
+static const efi_guid_t efi_shim_lock_guid = EFI_SHIM_LOCK_GUID;
+static char mok_policy = 0;
+
 /**
  * efi_init_obj_list() - Initialize and populate EFI object list
  *
@@ -306,6 +309,15 @@ efi_status_t efi_init_obj_list(void)
 	if (ret != EFI_SUCCESS)
 		goto out;
 
+	/* Disable NX support, hacking this on the go for testing purposes*/
+	ret = efi_set_variable_int(u"MokPolicy",
+				   &efi_shim_lock_guid,
+				   EFI_VARIABLE_BOOTSERVICE_ACCESS,
+				   1,
+				   &mok_policy, false);
+	if (ret != EFI_SUCCESS)
+		goto out;
+
 	/* Indicate supported runtime services */
 	ret = efi_init_runtime_supported();
 	if (ret != EFI_SUCCESS)
@@ -324,6 +336,9 @@ efi_status_t efi_init_obj_list(void)
 	}
 #ifdef CONFIG_NETDEVICES
 	ret = efi_net_register();
+	if (ret != EFI_SUCCESS)
+		goto out;
+	ret = efi_http_register();
 	if (ret != EFI_SUCCESS)
 		goto out;
 #endif
