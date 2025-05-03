@@ -711,9 +711,13 @@ def setup_buildconfigspec(item):
     """
 
     for options in item.iter_markers('buildconfigspec'):
-        option = options.args[0]
-        if not ubconfig.buildconfig.get('config_' + option.lower(), None):
-            pytest.skip('.config feature "%s" not enabled' % option.lower())
+        match = False
+        for arg in options.args:
+            if ubconfig.buildconfig.get('config_' + arg.lower(), None):
+                match = True
+        if match:
+            argsString = ', '.join(options.args)
+            pytest.skip(f'.config features "{argsString}" not enabled')
     for options in item.iter_markers('notbuildconfigspec'):
         option = options.args[0]
         if ubconfig.buildconfig.get('config_' + option.lower(), None):

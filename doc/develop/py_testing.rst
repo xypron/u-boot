@@ -454,6 +454,30 @@ One example is that testing of the `md` command requires knowledge of a RAM
 address to use for the test. This data is parsed from the output of the
 `bdinfo` command, and hence relies on CONFIG_CMD_BDI being enabled.
 
+A required configuration setting can be defined via a buildconfigspec()
+annotaton. The name of the configuration option is specified in lower case. The
+following annotaton for a test requires CONFIG_EFI_LOADER=y:
+
+.. code-block:: python
+
+    @pytest.mark.buildconfigspec('efi_loader')
+
+Sometimes multiple configuration option supplys the same functionality. If
+multiple arguments are passed to buildconfigspec(), only one of the
+configuration options needs to be set. The following annotation requires that
+either of CONFIG_NET or CONFIG_NET_LWIP is set:
+
+.. code-block:: python
+
+    @pytest.mark.buildconfigspec('net', 'net lwip')
+
+The notbuildconfigspec() annotation can be used to require a configuration
+option not to be set. The following annotation requires CONFIG_RISCV=n:
+
+.. code-block:: python
+
+    @pytest.mark.notbuildconfigspec('riscv')
+
 For a complete list of dependencies, please search the test scripts for
 instances of:
 
