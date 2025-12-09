@@ -381,12 +381,14 @@ qemu_arm test.py:
   variables:
     TEST_PY_BD: "qemu_arm"
     TEST_PY_TEST_SPEC: "not sleep"
+    OVERRIDE: "-a CONFIG_SEMIHOSTING=y"
   <<: *buildman_and_testpy_dfn
 
 qemu_arm64 test.py:
   variables:
     TEST_PY_BD: "qemu_arm64"
     TEST_PY_TEST_SPEC: "not sleep"
+    OVERRIDE: "-a CONFIG_SEMIHOSTING=y"
   <<: *buildman_and_testpy_dfn
 
 qemu_arm64_lwip test.py:
@@ -478,12 +480,14 @@ qemu-riscv64_smode test.py:
   variables:
     TEST_PY_BD: "qemu-riscv64_smode"
     TEST_PY_TEST_SPEC: "not sleep"
+    OVERRIDE: "-a CONFIG_SEMIHOSTING=y"
   <<: *buildman_and_testpy_dfn
 
 qemu-riscv64_smode_acpi test.py:
   variables:
     TEST_PY_BD: "qemu-riscv64_smode_acpi"
     TEST_PY_TEST_SPEC: "not sleep"
+    OVERRIDE: "-a CONFIG_SEMIHOSTING=y"
   <<: *buildman_and_testpy_dfn
 
 qemu-x86 test.py:

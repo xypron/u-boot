@@ -501,9 +501,11 @@ stages:
         qemu_arm:
           TEST_PY_BD: "qemu_arm"
           TEST_PY_TEST_SPEC: "not sleep"
+          OVERRIDE: "-a CONFIG_SEMIHOSTING=y"
         qemu_arm64:
           TEST_PY_BD: "qemu_arm64"
           TEST_PY_TEST_SPEC: "not sleep"
+          OVERRIDE: "-a CONFIG_SEMIHOSTING=y"
         qemu_arm64_lwip:
           TEST_PY_BD: "qemu_arm64_lwip"
           TEST_PY_TEST_SPEC: "test_net_dhcp or test_net_ping or test_net_tftpboot"
@@ -553,9 +555,11 @@ stages:
         qemu_riscv64_smode:
           TEST_PY_BD: "qemu-riscv64_smode"
           TEST_PY_TEST_SPEC: "not sleep"
+          OVERRIDE: "-a CONFIG_SEMIHOSTING=y"
         qemu_riscv64_smode_acpi:
           TEST_PY_BD: "qemu-riscv64_smode_acpi"
           TEST_PY_TEST_SPEC: "not sleep"
+          OVERRIDE: "-a CONFIG_SEMIHOSTING=y"
         qemu_x86:
           TEST_PY_BD: "qemu-x86"
           TEST_PY_TEST_SPEC: "not sleep"
