@@ -11,7 +11,11 @@ obj-$(CONFIG_SIMPLE_PM_BUS)	+= simple-pm-bus.o
 obj-$(CONFIG_DM)	+= dump.o
 obj-$(CONFIG_$(PHASE_)REGMAP)	+= regmap.o
 obj-$(CONFIG_$(PHASE_)SYSCON)	+= syscon-uclass.o
-obj-$(CONFIG_$(PHASE_)OF_LIVE) += of_access.o of_addr.o
+ifdef CONFIG_$(PHASE_)OF_LIVE
+obj-y += of_access.o of_addr.o
+else
+obj-y += nof_access.o nof_addr.o
+endif
 ifndef CONFIG_DM_DEV_READ_INLINE
 obj-$(CONFIG_OF_CONTROL) += read.o
 endif
