@@ -9,6 +9,10 @@
 #ifndef _DM_OF_ADDR_H
 #define _DM_OF_ADDR_H
 
+#include <asm/types.h>
+#include <dm/of.h>
+#include <linux/types.h>
+
 /**
  * of_translate_address() - translate a device-tree address to a CPU address
  *
