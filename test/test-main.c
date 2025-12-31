@@ -734,6 +734,7 @@ int ut_run_list(struct unit_test_state *uts, const char *category,
 
 	uts->of_root = gd_of_root();
 	uts->runs_per_test = runs_per_test;
+#ifdef CONFIG_SANDBOX
 	if (fdt_action() == FDTCHK_COPY && gd->fdt_blob) {
 		uts->fdt_size = fdt_totalsize(gd->fdt_blob);
 		uts->fdt_copy = os_malloc(uts->fdt_size);
@@ -743,6 +744,7 @@ int ut_run_list(struct unit_test_state *uts, const char *category,
 		}
 		memcpy(uts->fdt_copy, gd->fdt_blob, uts->fdt_size);
 	}
+#endif
 	uts->force_run = force_run;
 	ret = ut_run_tests(uts, prefix, tests, count, select_name,
 			   test_insert);
