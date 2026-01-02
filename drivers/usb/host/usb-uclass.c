@@ -664,18 +664,11 @@ static int usb_find_and_bind_driver(struct udevice *parent,
 				continue;
 
 			drv = entry->driver;
-			/*
-			 * We could pass the descriptor to the driver as
-			 * plat (instead of NULL) and allow its bind()
-			 * method to return -ENOENT if it doesn't support this
-			 * device. That way we could continue the search to
-			 * find another driver. For now this doesn't seem
-			 * necesssary, so just bind the first match.
-			 */
 			ret = device_bind(parent, drv, drv->name, NULL, node,
 					  &dev);
+			/* If binding fails try the next matching driver */
 			if (ret)
-				goto error;
+				continue;
 			debug("%s: Match found: %s\n", __func__, drv->name);
 			dev->driver_data = id->driver_info;
 			plat = dev_get_parent_plat(dev);
@@ -694,7 +687,6 @@ static int usb_find_and_bind_driver(struct udevice *parent,
 	if (!ret)
 		device_set_name_alloced(*devp);
 
-error:
 	debug("%s: No match found: %d\n", __func__, ret);
 	return ret;
 }
