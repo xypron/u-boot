@@ -690,15 +690,9 @@ err:
 	return ret;
 }
 
-static const struct udevice_id usb_kbd_ids[] = {
-	{ .compatible = "usb-keyboard" },
-	{ }
-};
-
 U_BOOT_DRIVER(usb_kbd) = {
 	.name	= "usb_kbd",
 	.id	= UCLASS_KEYBOARD,
-	.of_match = usb_kbd_ids,
 	.probe = usb_kbd_probe,
 	.remove = usb_kbd_remove,
 };
