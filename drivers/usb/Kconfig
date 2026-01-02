@@ -68,6 +68,8 @@ config SPL_DM_USB_GADGET
 	  Enable driver model for USB Gadget in SPL
 	  (Peripheral mode)
 
+source "drivers/usb/hid/Kconfig"
+
 source "drivers/usb/host/Kconfig"
 
 source "drivers/usb/isp1760/Kconfig"

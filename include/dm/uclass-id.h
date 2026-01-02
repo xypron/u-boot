@@ -73,6 +73,7 @@ enum uclass_id {
 	UCLASS_FWU_MDATA,	/* FWU Metadata Access */
 	UCLASS_GPIO,		/* Bank of general-purpose I/O pins */
 	UCLASS_HASH,		/* Hash device */
+	UCLASS_HID,		/* Human Interface Device */
 	UCLASS_HWSPINLOCK,	/* Hardware semaphores */
 	UCLASS_HOST,		/* Sandbox host device */
 	UCLASS_I2C,		/* I2C bus */

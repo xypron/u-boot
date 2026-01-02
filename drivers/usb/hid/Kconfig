@@ -1,0 +1,5 @@
+config USB_HID
+	bool "Support for HID devices"
+	depends on USB_HOST
+	help
+	  Add support for human interface devices.

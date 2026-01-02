@@ -1044,6 +1044,7 @@ libs-y += drivers/usb/emul/
 libs-y += drivers/usb/eth/
 libs-$(CONFIG_USB_GADGET) += drivers/usb/gadget/
 libs-$(CONFIG_USB_GADGET) += drivers/usb/gadget/udc/
+libs-y += drivers/usb/hid/
 libs-y += drivers/usb/host/
 libs-y += drivers/usb/mtu3/
 libs-y += drivers/usb/musb-new/
