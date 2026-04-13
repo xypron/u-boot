@@ -73,9 +73,12 @@ static int disk_rw(__u32 sect, __u32 nr_sect, void *buf, bool read)
 {
 	int ret;
 	__u8 *block = NULL;
-	__u32 rem, size, s, n;
+	__u32 rem, size, s, n, offset;
 	const ulong blksz = cur_part_info.blksz;
 	const lbaint_t start = cur_part_info.start;
+
+	if (!fat_sect_size)
+		return -1;
 
 	rem = nr_sect * fat_sect_size;
 	/*
@@ -91,46 +94,41 @@ static int disk_rw(__u32 sect, __u32 nr_sect, void *buf, bool read)
 	 *
 	 */
 
-	/* Do part 1 */
-	if (fat_sect_size) {
-		__u32 offset;
+	/* Do part 1, read one block and overwrite the leading sectors */
+	block = malloc_cache_aligned(cur_dev->blksz);
+	if (!block) {
+		printf("Error: allocating block: %lu\n", cur_dev->blksz);
+		return -1;
+	}
 
-		/* Read one block and overwrite the leading sectors */
-		block = malloc_cache_aligned(cur_dev->blksz);
-		if (!block) {
-			printf("Error: allocating block: %lu\n", cur_dev->blksz);
-			return -1;
-		}
+	s = sect_to_block(sect, &offset);
+	offset = offset * fat_sect_size;
 
-		s = sect_to_block(sect, &offset);
-		offset = offset * fat_sect_size;
+	ret = blk_dread(cur_dev, start + s, 1, block);
+	if (ret != 1) {
+		ret = -1;
+		goto exit;
+	}
 
-		ret = blk_dread(cur_dev, start + s, 1, block);
+	if (rem > (blksz - offset))
+		size = blksz - offset;
+	else
+		size = rem;
+
+	if (read) {
+		memcpy(buf, block + offset, size);
+	} else {
+		memcpy(block + offset, buf, size);
+		ret = blk_dwrite(cur_dev, start + s, 1, block);
 		if (ret != 1) {
 			ret = -1;
 			goto exit;
 		}
-
-		if (rem > (blksz - offset))
-			size = blksz - offset;
-		else
-			size = rem;
-
-		if (read) {
-			memcpy(buf, block + offset, size);
-		} else {
-			memcpy(block + offset, buf, size);
-			ret = blk_dwrite(cur_dev, start + s, 1, block);
-			if (ret != 1) {
-				ret = -1;
-				goto exit;
-			}
-		}
-
-		rem -= size;
-		buf += size;
-		s++;
 	}
+
+	rem -= size;
+	buf += size;
+	s++;
 
 	/* Do part 2, read/write directly to/from the given buffer */
 	if (rem > blksz) {
