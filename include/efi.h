@@ -682,6 +682,25 @@ int efi_get_mmap(struct efi_mem_desc **descp, int *sizep, uint *keyp,
 void efi_show_tables(struct efi_system_table *systab);
 
 /**
+ * efi_mem_type_name() - get the name of an EFI memory type
+ *
+ * @type: memory type (enum efi_memory_type)
+ * Return: name of the memory type, or NULL if @type is unknown
+ */
+const char *efi_mem_type_name(u32 type);
+
+/**
+ * efi_print_mem_attrs() - print the names of set EFI memory attributes
+ *
+ * Prints the set attribute bits as a '|'-separated list of names, e.g.
+ * ' UC|WB|RT', preceded by a space. Prints nothing if no known attribute
+ * bit is set.
+ *
+ * @attributes: memory attributes (EFI_MEMORY_...)
+ */
+void efi_print_mem_attrs(u64 attributes);
+
+/**
  * efi_get_basename() - Get the default filename to use when loading
  *
  * E.g. this function returns BOOTAA64.EFI for an aarch target

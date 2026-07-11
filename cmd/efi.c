@@ -16,42 +16,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-static const char *const type_name[] = {
-	"reserved",
-	"loader_code",
-	"loader_data",
-	"bs_code",
-	"bs_data",
-	"rt_code",
-	"rt_data",
-	"conv",
-	"unusable",
-	"acpi_reclaim",
-	"acpi_nvs",
-	"io",
-	"io_port",
-	"pal_code",
-};
-
-static struct attr_info {
-	u64 val;
-	const char *name;
-} mem_attr[] = {
-	{ EFI_MEMORY_UC, "uncached" },
-	{ EFI_MEMORY_WC, "write-coalescing" },
-	{ EFI_MEMORY_WT, "write-through" },
-	{ EFI_MEMORY_WB, "write-back" },
-	{ EFI_MEMORY_UCE, "uncached & exported" },
-	{ EFI_MEMORY_WP, "write-protect" },
-	{ EFI_MEMORY_RP, "read-protect" },
-	{ EFI_MEMORY_XP, "execute-protect" },
-	{ EFI_MEMORY_NV, "non-volatile" },
-	{ EFI_MEMORY_MORE_RELIABLE, "higher reliability" },
-	{ EFI_MEMORY_RO, "read-only" },
-	{ EFI_MEMORY_SP, "specific purpose" },
-	{ EFI_MEMORY_RUNTIME, "needs runtime mapping" }
-};
-
 /* Maximum different attribute values we can track */
 #define ATTR_SEEN_MAX	30
 
@@ -175,8 +139,7 @@ static void efi_print_mem_table(struct efi_mem_desc *desc, int desc_size,
 		}
 		size = desc->num_pages << EFI_PAGE_SHIFT;
 
-		name = desc->type < ARRAY_SIZE(type_name) ?
-				type_name[desc->type] : "<invalid>";
+		name = efi_mem_type_name(desc->type) ?: "<invalid>";
 		printf("%2d  %x:%-12s  %010llx  %010llx  %010llx  ", upto,
 		       desc->type, name, desc->physical_start,
 		       desc->virtual_start, size);
@@ -197,20 +160,10 @@ static void efi_print_mem_table(struct efi_mem_desc *desc, int desc_size,
 	printf("\nAttributes key:\n");
 	for (i = 0; i < attr_seen_count; i++) {
 		u64 attr = attr_seen[i];
-		bool first;
-		int j;
 
-		printf("%c%llx: ", (attr & EFI_MEMORY_RUNTIME) ? 'r' : ' ',
+		printf("%c%llx:", (attr & EFI_MEMORY_RUNTIME) ? 'r' : ' ',
 		       attr & ~EFI_MEMORY_RUNTIME);
-		for (j = 0, first = true; j < ARRAY_SIZE(mem_attr); j++) {
-			if (attr & mem_attr[j].val) {
-				if (first)
-					first = false;
-				else
-					printf(", ");
-				printf("%s", mem_attr[j].name);
-			}
-		}
+		efi_print_mem_attrs(attr);
 		putc('\n');
 	}
 	if (skip_bs)
