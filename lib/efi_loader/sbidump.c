@@ -20,6 +20,8 @@ struct sbi_ext {
 	const char *name;
 };
 
+static struct efi_boot_services *bs;
+static struct efi_simple_text_input_protocol *cin;
 static struct efi_simple_text_output_protocol *cout;
 
 static struct sbi_imp implementations[] = {
@@ -439,6 +441,63 @@ int printf(const char *fmt, ...)
 	return 0;
 }
 
+/**
+ * efi_input() - read string from console
+ *
+ * @buffer:		input buffer
+ * @buffer_size:	buffer size
+ * Return:		status code
+ */
+static efi_status_t efi_input(char *buffer, efi_uintn_t buffer_size)
+{
+	struct efi_input_key key = {0};
+	efi_uintn_t index;
+	efi_uintn_t pos = 0;
+	char outbuf[2] = " ";
+	efi_status_t ret;
+
+	*buffer = 0;
+	for (;;) {
+		ret = bs->wait_for_event(1, &cin->wait_for_key, &index);
+		if (ret != EFI_SUCCESS)
+			continue;
+		ret = cin->read_key_stroke(cin, &key);
+		if (ret != EFI_SUCCESS)
+			continue;
+		switch (key.scan_code) {
+		case 0x17: /* Escape */
+			printf("\r\nAborted\r\n");
+			return EFI_ABORTED;
+		default:
+			break;
+		}
+		switch (key.unicode_char) {
+		case 0x08: /* Backspace */
+			if (pos) {
+				buffer[pos--] = 0;
+				printf("\b \b");
+			}
+			break;
+		case 0x0a: /* Linefeed */
+		case 0x0d: /* Carriage return */
+			printf("\r\n");
+			return EFI_SUCCESS;
+		default:
+			break;
+		}
+		/* Ignore surrogate codes */
+		if (key.unicode_char >= 0xD800 && key.unicode_char <= 0xDBFF)
+			continue;
+		if (key.unicode_char >= 0x20 &&
+		    pos < buffer_size - 1) {
+			*outbuf = key.unicode_char;
+			buffer[pos++] = key.unicode_char;
+			buffer[pos] = 0;
+			printf(outbuf);
+		}
+	}
+}
+
 void do_sbi(void)
 {
 	int i, impl_id;
@@ -504,6 +563,71 @@ void do_sbi(void)
 }
 
 /**
+ * efi_drain_input() - drain console input
+ */
+static void efi_drain_input(void)
+{
+	cin->reset(cin, true);
+}
+
+/**
+ * skip_whitespace() - skip over leading whitespace
+ *
+ * @pos:	UTF-16 string
+ * Return:	pointer to first non-whitespace
+ */
+static char *skip_whitespace(char *pos)
+{
+	for (; *pos && *pos <= 0x20; ++pos)
+		;
+	return pos;
+}
+
+/**
+ * starts_with() - check if @string starts with @keyword
+ *
+ * @string:	string to search for keyword
+ * @keyword:	keyword to be searched
+ * Return:	true fi @string starts with the keyword
+ */
+static bool starts_with(char *string, char *keyword)
+{
+	if (!string || !keyword)
+		return false;
+
+	for (; *keyword; ++string, ++keyword) {
+		if (*string != *keyword)
+			return false;
+	}
+	return true;
+}
+
+/**
+ * do_help() - print help
+ */
+static void do_help(void)
+{
+	printf("dump     - show SBI information\r\n");
+	printf("reboot   - reboot the device\r\n");
+	printf("poweroff - power off the device\r\n");
+	printf("exit     - exit\r\n");
+}
+
+static void do_reboot(void)
+{
+	xbi_ecall(SBI_EXT_SRST, SBI_EXT_SRST_RESET,
+		  SBI_SRST_RESET_TYPE_COLD_REBOOT, SBI_SRST_RESET_REASON_NONE,
+		  0, 0, 0, 0);
+}
+
+static void do_poweroff(void)
+{
+	xbi_ecall(SBI_EXT_SRST, SBI_EXT_SRST_RESET,
+		  SBI_SRST_RESET_TYPE_SHUTDOWN, SBI_SRST_RESET_REASON_NONE,
+		  0, 0, 0, 0);
+}
+
+/**
  * efi_main() - entry point of the EFI application.
  *
  * @handle:	handle of the loaded image
@@ -513,8 +637,34 @@ void do_sbi(void)
 efi_status_t EFIAPI efi_main(efi_handle_t image_handle,
 			     struct efi_system_table *systab)
 {
+	cin = systab->con_in;
 	cout = systab->con_out;
-	do_sbi();
+	bs = systab->boottime;
+
+	printf("\r\nSBI Dump\r\n========\r\n\r\n");
+
+	for (;;) {
+		char command[64];
+		char *pos;
+		efi_uintn_t ret;
+
+		efi_drain_input();
+		printf("$ ");
+		ret = efi_input(command, sizeof(command));
+		if (ret == EFI_ABORTED)
+			break;
+		pos = skip_whitespace(command);
+		if (starts_with(pos, "exit"))
+			break;
+		else if (starts_with(pos, "dump"))
+			do_sbi();
+		else if (starts_with(pos, "reboot"))
+			do_reboot();
+		else if (starts_with(pos, "poweroff"))
+			do_poweroff();
+		else
+			do_help();
+	}
 
 	return EFI_SUCCESS;
 }
